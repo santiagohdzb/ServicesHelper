@@ -27,12 +27,15 @@ app.on('ready', function() {
 
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1090,
-    height: 720,
+    width: 746,
+    height: 284,
     toolbar: false,
     menubar: false,
-    resizable: false 
+    resizable: true
   });
+  
+  // Removes the menu from there
+  //mainWindow.setMenu(null);
 
   // and load the index.html of the app.
   mainWindow.loadUrl('file://' + __dirname + '/index.html');

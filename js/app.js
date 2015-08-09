@@ -3,76 +3,70 @@
  * Jamesoft (c) 2015
  * 
  */
-;(function(){
-  var ps = require('ps-node')
+;(function() {
+  var ps = require('ps-node'),
+      ChildProcess = require('child_process'),
+      spawn = ChildProcess.spawn,
+      CMD = spawn('cmd')
   
-  var lookup = function(name, cbk) {
-    ps.lookup({command: name}, function(err, resultList) {
-      if (err)
-        throw new Error(err)
-      cbk(resultList)
+  var lookup = function(fn) {    
+    ps.lookup({}, function(err, resultList) {
+      if (err) throw new Error(err)
+      fn(resultList)
     })
   }
   
-  var createInterfaz = function() {
-    var body = document.body,
-        processWrapper = document.createElement("div"),
-        controls = document.createElement("div"),
-        results = document.createElement("table")
+  var init = function(apps, wrapper) {
+    wrapper = document.createElement("div")
+    wrapper.id = "processWrapper"
+    document.body.appendChild(wrapper)
     
-    processWrapper.id = "processWrapper"
-    controls.id = "processControls"
-    results.id = "processResults"
-    
-    var showProcesses = function(list) {
-      var headers = ["PID", "NOMBRE"],
-          thead = results.tHead,
-          tbody = results.tBodies[0]
-      
-      thead.innerHTML = "<tr><th>"+headers.join("</th><th>")+"</th></tr>"
-      tbody.innerHTML = ""
-      
-      list.forEach(function(proc) {
-        if(proc)
-          tbody.innerHTML += "" + 
-            "<tr><td>" + 
-              [proc.pid, proc.command].join("</td><td>") + 
-            "</td></tr>"
+    for(var app in apps) 
+      wrapper.appendChild(apps[app].build())
+        
+    setInterval(function() {
+      lookup(function(list) {
+        for(var app in apps) 
+          apps[app].search(list)
       })
-    }
-    
-    var initResultsTable = function() {
-      results.appendChild(document.createElement("thead"))
-      results.appendChild(document.createElement("tbody"))
-    }
-    
-    var createControls = function() {
-      var search = document.createElement("input"),
-          button = document.createElement("input")      
-          
-      search.id = search.name = "processName"
-      search.placeholder = "Nombre de proceso"
-      button.id = "buscar"
-      button.type = "button"
-      button.value = "Buscar"
-      button.addEventListener("click", function() {
-        lookup(search.value, showProcesses)
-      }, false)
-      
-      controls.appendChild(search)
-      controls.appendChild(button)
-    }
-    
-    createControls()
-    initResultsTable()
-    
-    processWrapper.appendChild(controls)
-    processWrapper.appendChild(results)
-    body.appendChild(processWrapper)
+    }, 500)
   }
-  
-  document.addEventListener("DOMContentLoaded", function(){
-    createInterfaz()
-  }, false)
+
+  document.addEventListener("DOMContentLoaded", function() {
+    init({
+      chrome: Program.createProgram({
+        name: "chrome",
+        logo: "img/chrome.png", 
+        start: function() {
+          console.log("attempting to start")
+          CMD.stdin.write('start chrome.exe -p "santiago" \n')
+          CMD.stdin.end()
+        }
+      }),
+      apache: Program.createProgram({
+        name: "httpd",
+        logo: "img/apache.jpg"
+      }),
+      mysqld: Program.createProgram({
+        name: "mysqld",
+        logo: "img/mysql.jpg"
+      }),
+      sqlserver: Program.createProgram({
+        name: "mssqlserver",
+        command: "sqlservr|sqlbrowser|MsDtsSrvr|sqlwriter|SQLAGENT",
+        logo: "img/sqlserver.png"
+      }),
+      oracledatabase: Program.createProgram({
+        name: "mssqlserver",
+        command: "OraVSSW|nmesrvc|extjob|omtsreco|TNSLSNR|ORACLE",
+        logo: "img/oracledatabase.png"
+      }),
+      hamachi: Program.createProgram({
+        name: "hamachi",
+        command: "hamachi|LMIGuardianSvc",
+        logo: "img/hamachi.png"
+      })
+    })
+  })
 
 }())
