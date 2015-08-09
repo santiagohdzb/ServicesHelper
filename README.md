@@ -1,9 +1,9 @@
 # ServicesHelper
 
-Tool for developers who want to check the memmory usage and number of processes for each
-server, application or service running.
+Tool for developers who want to check the memmory usage and number of processes for specific
+servers, applications and/or services running.
 
-written in Javascript and using Electron as the core
+Written in Javascript and using Electron/IO.js as the core
 
 #TODO
 - Support to add custom applications
